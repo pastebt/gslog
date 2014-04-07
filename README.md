@@ -57,14 +57,14 @@ logger.Debug("haha")
 ```
 then run ```cat /tmp/file.log``` you will see same log message
 
-###Log into file, with custermized file size and number of keeped log file
+###Log into file, with custormized file size and number of keeped log file
 ```go
 import "github.com/pastebt/gslog"
 
 logger := gslog.GetLogger("").SetWriter(WriterNew("/tmp/file.log").SetSize(1000000).SetNum(5))
 logger.Debug("haha")
 ```
-default file size is 10M (10000000), number is 9, and 10k < size < 1G, 0 < num < 100
+default file size is 10M (10000000), number is 9, and 10k < size < 1G, 0 < num < 100 .
 If you want the log file increase forever, SetNum(0)
 
 ###Customize log format
