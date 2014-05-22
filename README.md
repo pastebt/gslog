@@ -72,7 +72,7 @@ If you want the log file increase forever, SetNum(0)
 import "time"
 import "github.com/pastebt/gslog"
 
-func cfmt(name string, level string, msg string) string {
+func cfmt(name string, lv string, msg string) string {
     return time.Now().Format("2006/01/02 15:04:05") +
            " -" + name + "- " + lv + " : " + msg + "\n"
 }
