@@ -173,3 +173,17 @@ func (l *Logger)getFunf(li int, lv string) func (f string, v ...interface{}) {
         l.w.log(msg)
     }
 }
+
+
+var l = GetLogger("")
+var Debug  = l.Debug
+var Info   = l.Info
+var Warn   = l.Warn
+var Error  = l.Error
+var Fatal  = l.Fatal
+var Debugf = l.Debugf
+var Infof  = l.Infof
+var Warnf  = l.Warnf
+var Errorf = l.Errorf
+var Fatalf = l.Fatalf
+
