@@ -6,6 +6,7 @@ import (
     "fmt"
     "sync"
     "time"
+    glog "log"
 )
 
 
@@ -70,7 +71,7 @@ func (w *Writer)rotate(s int, d int) (err error) {
 }
 
 
-func (w *Writer)log(msg string) {
+func (w *Writer)log(msg string) (n int, err error){
     w.m.Lock()
     defer w.m.Unlock()
     // if has path and num > 0, means we need file and rotate
@@ -83,8 +84,21 @@ func (w *Writer)log(msg string) {
             }
         }
     }
-    w.file.WriteString(msg)
+    n, err = w.file.WriteString(msg)
     w.file.Sync()
+    return
+}
+
+
+// Help function
+func (w *Writer)Write(p []byte) (n int, err error) {
+    return w.log(string(p))
+}
+
+// let go system log write into logfile
+func (w *Writer)SetGo() *Writer {
+    glog.SetOutput(w)
+    return w
 }
 
 
@@ -175,6 +189,7 @@ func (l *Logger)getFunf(li int, lv string) func (f string, v ...interface{}) {
 }
 
 
+// convenient function for default logger
 var l = GetLogger("")
 var Debug  = l.Debug
 var Info   = l.Info
@@ -186,4 +201,6 @@ var Infof  = l.Infof
 var Warnf  = l.Warnf
 var Errorf = l.Errorf
 var Fatalf = l.Fatalf
-
+var SetFmt = l.SetFmt
+var SetLevel = l.SetLevel
+var SetWriter = l.SetWriter

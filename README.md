@@ -57,6 +57,11 @@ logger.Debug("haha")
 ```
 then run ```cat /tmp/file.log``` you will see same log message
 
+You can merge golang "log" message into same file
+```go
+logger := gslog.GetLogger("").SetWriter(WriterNew("/tmp/file.log").SetGo())
+```
+
 ###Log into file, with custormized file size and number of keeped log file
 ```go
 import "github.com/pastebt/gslog"
