@@ -61,11 +61,13 @@ func (w *Writer)rotate(s int, d int) (err error) {
         return
     }
     dst := fmt.Sprintf("%s.%d", w.path, d)
-    if _, err = os.Stat(dst); err == nil {
+    if _, e := os.Stat(dst); e == nil {
+        // file exists, try next number
         if err = w.rotate(d, d + 1); err != nil {
-            err = os.Rename(src, dst)
+            return
         }
     }
+    err = os.Rename(src, dst)
     return
 }
 
@@ -76,7 +78,7 @@ func (w *Writer)log(msg string) {
     // if has path and num > 0, means we need file and rotate
     if len(w.path) > 0 && w.num > 0 {
         s, e := w.file.Stat()
-        if e == nil &&  int64(len(msg)) + s.Size() > int64(w.size) {
+        if e == nil && int64(len(msg)) + s.Size() > int64(w.size) {
             if err :=w.rotate(0, 1); err == nil {
                 w.file.Close()
                 w.file, _ = os.OpenFile(w.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
