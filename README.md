@@ -57,6 +57,11 @@ logger.Debug("haha")
 ```
 then run ```cat /tmp/file.log``` you will see same log message
 
+###Merge golang "log" message into same file
+```go
+logger := gslog.GetLogger("").SetWriter(WriterNew("/tmp/file.log").SetGo())
+```
+
 ###Log into file, with custormized file size and number of keeped log file
 ```go
 import "github.com/pastebt/gslog"
@@ -72,7 +77,7 @@ If you want the log file increase forever, SetNum(0)
 import "time"
 import "github.com/pastebt/gslog"
 
-func cfmt(name string, level string, msg string) string {
+func cfmt(name string, lv string, msg string) string {
     return time.Now().Format("2006/01/02 15:04:05") +
            " -" + name + "- " + lv + " : " + msg + "\n"
 }
