@@ -25,11 +25,14 @@ type Writer struct {
     size int
     num  int
     m    *sync.Mutex
+    ch   chan string
+    log  func(msg string) (n int, err error)
 }
 
 
 func WriterNew(fn string) (w *Writer) {
     w = &Writer{file:os.Stderr, m:&(sync.Mutex{})}
+    w.log = func (msg string) (n int, err error) { return lockLog(w, msg) }
     if fn == "" { return }
     var err error
     w.file, err = os.OpenFile(fn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
@@ -40,6 +43,30 @@ func WriterNew(fn string) (w *Writer) {
     }
     return
 }
+
+// if your disk is so slow to save the log, you can use this
+func (w *Writer)UseChan() *Writer {
+    w.ch = make(chan string)
+    w.log = func (msg string) (n int, err error) { return chanLog(w, msg) }
+    go func () {
+        for {
+            msg := <-w.ch
+            w.oneLog(msg)
+            b := true
+            for b {
+                select {
+                case msg := <-w.ch:
+                    w.oneLog(msg)
+                default:
+                    w.file.Sync()
+                    b = false
+                }
+            }
+        }
+    }()
+    return w
+}
+
 
 // limit one log file size between 10k to 1G
 func (w *Writer)SetSize(i int) *Writer {
@@ -73,9 +100,21 @@ func (w *Writer)rotate(s int, d int) (err error) {
 }
 
 
-func (w *Writer)log(msg string) (n int, err error){
+func lockLog(w *Writer, msg string) (n int, err error) {
     w.m.Lock()
+    defer w.file.Sync()
     defer w.m.Unlock()
+    return w.oneLog(msg)
+}
+
+
+func chanLog(w *Writer, msg string) (n int, err error) {
+    w.ch<- msg
+    return len(msg), nil
+}
+
+
+func (w *Writer)oneLog(msg string) (n int, err error){
     // if has path and num > 0, means we need file and rotate
     if len(w.path) > 0 && w.num > 0 {
         s, e := w.file.Stat()
@@ -87,7 +126,7 @@ func (w *Writer)log(msg string) (n int, err error){
         }
     }
     n, err = w.file.WriteString(msg)
-    w.file.Sync()
+    //w.file.Sync()
     return
 }
 
