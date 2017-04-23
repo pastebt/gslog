@@ -46,7 +46,7 @@ func WriterNew(fn string) (w *Writer) {
 
 // if your disk is so slow to save the log, you can use this
 func (w *Writer)UseChan() *Writer {
-    w.ch = make(chan string)
+    w.ch = make(chan string, 1000)
     w.log = func (msg string) (n int, err error) { return chanLog(w, msg) }
     go func () {
         for {
